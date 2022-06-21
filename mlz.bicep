@@ -95,10 +95,9 @@ param onPremSubnetAddressPrefix string = '10.0.121.0/27'
 
 @allowed([
   'Standard'
-  'Premium'
 ])
 @description('[Standard/Premium] The SKU for Azure Firewall. It defaults to "Premium".')
-param firewallSkuTier string = 'Premium'
+param firewallSkuTier string = 'Standard'
 
 @allowed([
   'Alert'
@@ -471,89 +470,6 @@ param bastionHostSubnetAddressPrefix string = '10.0.100.160/27'
 @description('The Azure Bastion Public IP Address Availability Zones. It defaults to "No-Zone" because Availability Zones are not available in every cloud. See https://docs.microsoft.com/en-us/azure/virtual-network/ip-services/public-ip-addresses#sku for valid settings.')
 param bastionHostPublicIPAddressAvailabilityZones array = []
 
-// LINUX VIRTUAL MACHINE PARAMETERS
-
-//@description('The administrator username for the Linux Virtual Machine to Azure Bastion remote into. It defaults to "azureuser".')
-//param linuxVmAdminUsername string = 'azureuser'
-
-//@allowed([
-//  'sshPublicKey'
-//  'password'
-//])
-//@description('[sshPublicKey/password] The authentication type for the Linux Virtual Machine to Azure Bastion remote into. It defaults to "password".')
-//param linuxVmAuthenticationType string = 'password'
-
-//@description('The administrator password or public SSH key for the Linux Virtual Machine to Azure Bastion remote into. See https://docs.microsoft.com/en-us/azure/virtual-machines/linux/faq#what-are-the-password-requirements-when-creating-a-vm- for password requirements.')
-//@secure()
-//@minLength(12)
-//param linuxVmAdminPasswordOrKey string = deployRemoteAccess ? '' : newGuid()
-
-//@description('The size of the Linux Virtual Machine to Azure Bastion remote into. It defaults to "Standard_B2s".')
-//param linuxVmSize string = 'Standard_B2s'
-
-//@description('The disk creation option of the Linux Virtual Machine to Azure Bastion remote into. It defaults to "FromImage".')
-//param linuxVmOsDiskCreateOption string = 'FromImage'
-
-//@description('The disk type of the Linux Virtual Machine to Azure Bastion remote into. It defaults to "Standard_LRS".')
-//param linuxVmOsDiskType string = 'Standard_LRS'
-
-//@description('The image publisher of the Linux Virtual Machine to Azure Bastion remote into. It defaults to "Canonical".')
-//param linuxVmImagePublisher string = 'Canonical'
-
-//@description('The image offer of the Linux Virtual Machine to Azure Bastion remote into. It defaults to "UbuntuServer".')
-//param linuxVmImageOffer string = 'UbuntuServer'
-
-//@description('The image SKU of the Linux Virtual Machine to Azure Bastion remote into. It defaults to "18.04-LTS".')
-//param linuxVmImageSku string = '18.04-LTS'
-
-//@description('The image version of the Linux Virtual Machine to Azure Bastion remote into. It defaults to "latest".')
-//param linuxVmImageVersion string = 'latest'
-
-//@allowed([
-//  'Static'
-//  'Dynamic'
-//])
-//@description('[Static/Dynamic] The public IP Address allocation method for the Linux virtual machine. It defaults to "Dynamic".')
-//param linuxNetworkInterfacePrivateIPAddressAllocationMethod string = 'Dynamic'
-
-// WINDOWS VIRTUAL MACHINE PARAMETERS
-
-//@description('The administrator username for the Windows Virtual Machine to Azure Bastion remote into. It defaults to "azureuser".')
-//param windowsVmAdminUsername string = 'azureuser'
-
-//@description('The administrator password the Windows Virtual Machine to Azure Bastion remote into. It must be > 12 characters in length. See https://docs.microsoft.com/en-us/azure/virtual-machines/windows/faq#what-are-the-password-requirements-when-creating-a-vm- for password requirements.')
-//@secure()
-//@minLength(12)
-//param windowsVmAdminPassword string = deployRemoteAccess ? '' : newGuid()
-
-//@description('The size of the Windows Virtual Machine to Azure Bastion remote into. It defaults to "Standard_DS1_v2".')
-//param windowsVmSize string = 'Standard_DS1_v2'
-
-//@description('The publisher of the Windows Virtual Machine to Azure Bastion remote into. It defaults to "MicrosoftWindowsServer".')
-//param windowsVmPublisher string = 'MicrosoftWindowsServer'
-
-//@description('The offer of the Windows Virtual Machine to Azure Bastion remote into. It defaults to "WindowsServer".')
-//param windowsVmOffer string = 'WindowsServer'
-
-//@description('The SKU of the Windows Virtual Machine to Azure Bastion remote into. It defaults to "2019-datacenter".')
-//param windowsVmSku string = '2019-datacenter'
-
-//@description('The version of the Windows Virtual Machine to Azure Bastion remote into. It defaults to "latest".')
-//param windowsVmVersion string = 'latest'
-
-//@description('The disk creation option of the Windows Virtual Machine to Azure Bastion remote into. It defaults to "FromImage".')
-//param windowsVmCreateOption string = 'FromImage'
-
-//@description('The storage account type of the Windows Virtual Machine to Azure Bastion remote into. It defaults to "StandardSSD_LRS".')
-//param windowsVmStorageAccountType string = 'StandardSSD_LRS'
-
-//@allowed([
-//  'Static'
-//  'Dynamic'
-//])
-//@description('[Static/Dynamic] The public IP Address allocation method for the Windows virtual machine. It defaults to "Dynamic".')
-//param windowsNetworkInterfacePrivateIPAddressAllocationMethod string = 'Dynamic'
-
 // POLICY PARAMETERS
 
 @description('When set to "true", deploys the Azure Policy set defined at by the parameter "policy" to the resource groups generated in the deployment. It defaults to "false".')
@@ -611,13 +527,11 @@ var firewallNamingConvention = replace(namingConvention, resourceToken, 'afw')
 var firewallPolicyNamingConvention = replace(namingConvention, resourceToken, 'afwp')
 var ipConfigurationNamingConvention = replace(namingConvention, resourceToken, 'ipconf')
 var logAnalyticsWorkspaceNamingConvention = replace(namingConvention, resourceToken, 'log')
-//var networkInterfaceNamingConvention = replace(namingConvention, resourceToken, 'nic')
 var networkSecurityGroupNamingConvention = replace(namingConvention, resourceToken, 'nsg')
 var publicIpAddressNamingConvention = replace(namingConvention, resourceToken, 'pip')
 var resourceGroupNamingConvention = replace(namingConvention, resourceToken, 'rg')
 var storageAccountNamingConvention = toLower('${resourcePrefix}st${nameToken}unique_storage_token')
 var subnetNamingConvention = replace(namingConvention, resourceToken, 'snet')
-//var virtualMachineNamingConvention = replace(namingConvention, resourceToken, 'vm')
 var virtualNetworkNamingConvention = replace(namingConvention, resourceToken, 'vnet')
 
 // HUB NAMES
@@ -703,12 +617,6 @@ var firewallPublicIpAddressAllocationMethod = 'Static'
 var bastionHostName = replace(bastionHostNamingConvention, nameToken, hubName)
 var bastionHostPublicIPAddressName = replace(publicIpAddressNamingConvention, nameToken, 'bas')
 var bastionHostIPConfigurationName = replace(ipConfigurationNamingConvention, nameToken, 'bas')
-//var linuxNetworkInterfaceName = replace(networkInterfaceNamingConvention, nameToken, 'bas-linux')
-//var linuxNetworkInterfaceIpConfigurationName = replace(ipConfigurationNamingConvention, nameToken, 'bas-linux')
-//var linuxVmName = replace(virtualMachineNamingConvention, nameToken, 'bas-linux')
-//var windowsNetworkInterfaceName = replace(networkInterfaceNamingConvention, nameToken, 'bas-windows')
-//var windowsNetworkInterfaceIpConfigurationName = replace(ipConfigurationNamingConvention, nameToken, 'bas-windows')
-//var windowsVmName = replace(virtualMachineNamingConvention, nameToken, 'bas-windows')
 
 // BASTION VALUES
 
@@ -1068,38 +976,6 @@ module remoteAccess './core/remote-access.bicep' = if (deployRemoteAccess) {
     bastionHostPublicIPAddressAvailabilityZones: bastionHostPublicIPAddressAvailabilityZones
     bastionHostIPConfigurationName: bastionHostIPConfigurationName
 
-    //linuxNetworkInterfaceName: linuxNetworkInterfaceName
-    //linuxNetworkInterfaceIpConfigurationName: linuxNetworkInterfaceIpConfigurationName
-    //linuxNetworkInterfacePrivateIPAddressAllocationMethod: linuxNetworkInterfacePrivateIPAddressAllocationMethod
-
-    //linuxVmName: linuxVmName
-    //linuxVmSize: linuxVmSize
-    //linuxVmOsDiskCreateOption: linuxVmOsDiskCreateOption
-    //linuxVmOsDiskType: linuxVmOsDiskType
-    //linuxVmImagePublisher: linuxVmImagePublisher
-    //linuxVmImageOffer: linuxVmImageOffer
-    //linuxVmImageSku: linuxVmImageSku
-    //linuxVmImageVersion: linuxVmImageVersion
-    //linuxVmAdminUsername: linuxVmAdminUsername
-    //linuxVmAuthenticationType: linuxVmAuthenticationType
-    //linuxVmAdminPasswordOrKey: linuxVmAdminPasswordOrKey
-
-    //windowsNetworkInterfaceName: windowsNetworkInterfaceName
-    //windowsNetworkInterfaceIpConfigurationName: windowsNetworkInterfaceIpConfigurationName
-    //windowsNetworkInterfacePrivateIPAddressAllocationMethod: windowsNetworkInterfacePrivateIPAddressAllocationMethod
-
-    //windowsVmName: windowsVmName
-    //windowsVmSize: windowsVmSize
-    //windowsVmAdminUsername: windowsVmAdminUsername
-    //windowsVmAdminPassword: windowsVmAdminPassword
-    //windowsVmPublisher: windowsVmPublisher
-    //windowsVmOffer: windowsVmOffer
-    //windowsVmSku: windowsVmSku
-    //windowsVmVersion: windowsVmVersion
-    //windowsVmCreateOption: windowsVmCreateOption
-    //windowsVmStorageAccountType: windowsVmStorageAccountType
-
-    //logAnalyticsWorkspaceId: logAnalyticsWorkspace.outputs.id
   }
 }
 

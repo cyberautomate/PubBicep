@@ -26,7 +26,6 @@ $name = "Sentinel-MLZ"
 $location = 'eastus'
 $templateFile = 'mlz.bicep'
 $resourcePrefix = "MyMLZ"
-$firewallSkuTier = 'Standard'
 $deployDefender = $true
 $deploySentinel = $true
 $deployRemoteAccess = $true
@@ -35,11 +34,22 @@ New-AzSubscriptionDeployment -Name $name `
 -Location $location `
 -TemplateFile $templateFile `
 -resourcePrefix $resourcePrefix `
--firewallSkuTier $firewallSkuTier `
 -deployDefender $deployDefender `
 -deploySentinel $deploySentinel `
 -deployRemoteAccess $deployRemoteAccess `
 -Verbose
+
+# Get all Resource Groups after MLZ deployment
+Get-AzResourceGroup | Select-Object -Property ResourceGroupName
+
+# Deploy VM to MLZ
+$vmTemplateFile = 'main.bicep'
+$adDeploymentName = 'Deploy-Domain-Controller'
+$resourceGroupName = 'mymlz-rg-onPrem-mlz'
+
+New-AzResourceGroupDeployment -TemplateFile $vmTemplateFile -Name $adDeploymentName -ResourceGroupName $resourceGroupName -Verbose
+
+
 
 
 

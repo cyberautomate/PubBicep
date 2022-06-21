@@ -26,7 +26,7 @@ resource networkInterface 'Microsoft.Network/networkInterfaces@2021-02-01' exist
   name: networkInterfaceName
 }
 
-resource windowsVirtualMachine 'Microsoft.Compute/virtualMachines@2021-04-01' = {
+resource windowsSVRVirtualMachine 'Microsoft.Compute/virtualMachines@2021-04-01' = {
   name: name
   location: location
   tags: tags
@@ -65,7 +65,7 @@ resource windowsVirtualMachine 'Microsoft.Compute/virtualMachines@2021-04-01' = 
 }
 
 resource dependencyAgent 'Microsoft.Compute/virtualMachines/extensions@2021-04-01' = {
-  name: '${windowsVirtualMachine.name}/DependencyAgentWindows'
+  name: '${windowsSVRVirtualMachine.name}/DependencyAgentWindows'
   location: location
   properties: {
     publisher: 'Microsoft.Azure.Monitoring.DependencyAgent'
@@ -76,7 +76,7 @@ resource dependencyAgent 'Microsoft.Compute/virtualMachines/extensions@2021-04-0
 }
 
 resource policyExtension 'Microsoft.Compute/virtualMachines/extensions@2021-04-01' = {
-  name: '${windowsVirtualMachine.name}/AzurePolicyforWindows'
+  name: '${windowsSVRVirtualMachine.name}/AzurePolicyforWindows'
   location: location
   properties: {
     publisher: 'Microsoft.GuestConfiguration'
@@ -88,7 +88,7 @@ resource policyExtension 'Microsoft.Compute/virtualMachines/extensions@2021-04-0
 }
 
 resource mmaExtension 'Microsoft.Compute/virtualMachines/extensions@2021-04-01' = {
-  name: '${windowsVirtualMachine.name}/MMAExtension'
+  name: '${windowsSVRVirtualMachine.name}/MMAExtension'
   location: location
   properties: {
     publisher: 'Microsoft.EnterpriseCloud.Monitoring'
@@ -105,7 +105,7 @@ resource mmaExtension 'Microsoft.Compute/virtualMachines/extensions@2021-04-01' 
 }
 
 resource networkWatcher 'Microsoft.Compute/virtualMachines/extensions@2020-06-01' = {
-  name: '${windowsVirtualMachine.name}/Microsoft.Azure.NetworkWatcher'
+  name: '${windowsSVRVirtualMachine.name}/Microsoft.Azure.NetworkWatcher'
   location: location
   properties: {
     publisher: 'Microsoft.Azure.NetworkWatcher'

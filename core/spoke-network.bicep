@@ -116,3 +116,4 @@ output subnetAddressPrefix string = virtualNetwork.outputs.subnets[0].properties
 output subnetResourceId string = virtualNetwork.outputs.subnets[0].id
 output networkSecurityGroupName string = networkSecurityGroup.outputs.name
 output networkSecurityGroupResourceId string =  networkSecurityGroup.outputs.id
+
