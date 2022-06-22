@@ -21,7 +21,10 @@ param location string = resourceGroup().location
 @description('Name of the virtual machine.')
 param vmName string = 'onPremDC'
 
-var logAnalyticsWorkspaceName = '/subscriptions/${subscription().subscriptionId}/resourcegroups/mymlz-rg-operations-mlz/providers/microsoft.operationalinsights/workspaces/mymlz-log-operations-mlz'
+param domainFQDN string = 'chiefslab.local'
+
+var logAnalyticsRG = 'mymlz-rg-operations-mlz'
+var logAnalyticsWorkspaceName = 'mymlz-log-operations-mlz'
 var storageAccountName = 'mymlzstonpremebxxtcvdy6'
 var subnetName = 'mymlz-snet-onPrem-mlz'
 var virtualNetworkName = 'mymlz-vnet-onPrem-mlz'
@@ -31,7 +34,7 @@ resource stg 'Microsoft.Storage/storageAccounts@2021-09-01' existing = {
   name: storageAccountName
 }
 
-resource securityGroup 'Microsoft.Network/networkSecurityGroups@2021-08-01' existing =  {
+resource nsg 'Microsoft.Network/networkSecurityGroups@2021-08-01' existing =  {
   name: networkSecurityGroupName
 }
 
@@ -41,6 +44,7 @@ resource vn 'Microsoft.Network/virtualNetworks@2021-08-01' existing = {
 
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2021-06-01' existing = {
   name: logAnalyticsWorkspaceName
+  scope: resourceGroup(logAnalyticsRG)
 }
 
 resource nic 'Microsoft.Network/networkInterfaces@2021-02-01' = {
@@ -108,6 +112,9 @@ resource svrVM 'Microsoft.Compute/virtualMachines@2021-03-01' = {
       }
     }
   }
+  identity: {
+    type: 'SystemAssigned'
+  }
 }
 
 resource dependencyAgent 'Microsoft.Compute/virtualMachines/extensions@2021-04-01' = {
@@ -157,5 +164,50 @@ resource networkWatcher 'Microsoft.Compute/virtualMachines/extensions@2020-06-01
     publisher: 'Microsoft.Azure.NetworkWatcher'
     type: 'NetworkWatcherAgentWindows'
     typeHandlerVersion: '1.4'
+  }
+}
+
+// Use PowerShell DSC to deploy Active Directory Domain Services on the domain controller
+resource domainControllerConfiguration 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
+  name: '${svrVM.name}/Microsoft.Powershell.DSC'
+  location: location
+  properties: {
+    publisher: 'Microsoft.Powershell'
+    type: 'DSC'
+    typeHandlerVersion: '2.77'
+    autoUpgradeMinorVersion: true
+    settings: {
+      ModulesUrl: 'https://github.com/joshua-a-lucas/BlueTeamLab/raw/main/scripts/Deploy-DomainServices.zip'
+      ConfigurationFunction: 'Deploy-DomainServices.ps1\\Deploy-DomainServices'
+      Properties: {
+        domainFQDN: domainFQDN
+        adminCredential: {
+          UserName: adminUsername
+          Password: 'PrivateSettingsRef:adminPassword'
+        }
+      }
+    }
+    protectedSettings: {
+      Items: {
+          adminPassword: adminPassword
+      }
+    }
+  }
+}
+
+// Update the virtual network with the domain controller as the primary DNS server
+module virtualNetworkDNS 'modules/network.bicep' = {
+  name: 'virtualNetworkDNS'
+  dependsOn: [
+    domainControllerConfiguration
+  ]
+  params: {
+    location: location
+    virtualNetworkName: virtualNetworkName
+    virtualNetworkAddressSpace: virtualNetworkAddressSpace
+    subnetName: subnetName
+    subnetAddressRange: subnetAddressRange
+    allowedSourceIPAddress: allowedSourceIPAddress
+    dnsServerIPAddress: domainController.outputs.privateIpAddress
   }
 }

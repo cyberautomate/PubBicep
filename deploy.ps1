@@ -59,4 +59,4 @@ New-AzResourceGroupDeployment -TemplateFile $vmTemplateFile -Name $adDeploymentN
 # Cleanup after deployment
 $filter = 'mymlz-rg'
 
-Get-AzResourceGroup | Where-Object ResourceGroupName -match $filter | Remove-AzResourceGroup -AsJob -Force
+Get-AzResourceGroup | Where-Object ResourceGroupName -match $filter | Remove-AzResourceGroup -Force -verbose
