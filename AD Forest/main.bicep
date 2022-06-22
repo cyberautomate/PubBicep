@@ -8,7 +8,7 @@ param adminPassword string
 
 @description('The Windows version for the VM. This will pick a fully patched Gen2 image of this given Windows version.')
 @allowed([
- '2022-datacenter-smalldisk-g2'
+  '2022-datacenter-smalldisk-g2'
 ])
 param OSVersion string = '2022-datacenter-smalldisk-g2'
 
@@ -21,7 +21,14 @@ param location string = resourceGroup().location
 @description('Name of the virtual machine.')
 param vmName string = 'onPremDC'
 
+@description('FQDN of domain being built inside the DC VM')
 param domainFQDN string = 'chiefslab.local'
+
+@description('Virtual Network address space of the exiting vNET')
+param virtualNetworkAddressSpace string = '10.0.121.0/26'
+
+@description('Subnet range where the DC VM will live')
+param subnetAddressRange string = '10.0.121.0/27'
 
 var logAnalyticsRG = 'mymlz-rg-operations-mlz'
 var logAnalyticsWorkspaceName = 'mymlz-log-operations-mlz'
@@ -177,7 +184,7 @@ resource domainControllerConfiguration 'Microsoft.Compute/virtualMachines/extens
     typeHandlerVersion: '2.77'
     autoUpgradeMinorVersion: true
     settings: {
-      ModulesUrl: 'https://github.com/joshua-a-lucas/BlueTeamLab/raw/main/scripts/Deploy-DomainServices.zip'
+      ModulesUrl: 'https://github.com/cyberautomate/PubBicep/blob/main/AD%20Forest/AD-Scripts/Deploy-DomainServices.zip'
       ConfigurationFunction: 'Deploy-DomainServices.ps1\\Deploy-DomainServices'
       Properties: {
         domainFQDN: domainFQDN
@@ -196,7 +203,7 @@ resource domainControllerConfiguration 'Microsoft.Compute/virtualMachines/extens
 }
 
 // Update the virtual network with the domain controller as the primary DNS server
-module virtualNetworkDNS 'modules/network.bicep' = {
+module virtualNetworkDNS 'modules/updateVNET.bicep' = {
   name: 'virtualNetworkDNS'
   dependsOn: [
     domainControllerConfiguration
@@ -207,7 +214,7 @@ module virtualNetworkDNS 'modules/network.bicep' = {
     virtualNetworkAddressSpace: virtualNetworkAddressSpace
     subnetName: subnetName
     subnetAddressRange: subnetAddressRange
-    allowedSourceIPAddress: allowedSourceIPAddress
-    dnsServerIPAddress: domainController.outputs.privateIpAddress
+    dnsServerIPAddress: nic.properties.ipConfigurations[0].properties.privateIPAddress
+    nsg: nsg.id
   }
 }
