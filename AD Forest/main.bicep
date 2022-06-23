@@ -22,7 +22,7 @@ param location string = resourceGroup().location
 param vmName string = 'onPremDC'
 
 @description('FQDN of domain being built inside the DC VM')
-param domainFQDN string = 'chiefslab.local'
+param domainName string = 'chiefslab.local'
 
 @description('Virtual Network address space of the exiting vNET')
 param virtualNetworkAddressSpace string = '10.0.121.0/26'
@@ -187,7 +187,7 @@ resource domainControllerConfiguration 'Microsoft.Compute/virtualMachines/extens
       ModulesUrl: 'https://github.com/cyberautomate/PubBicep/raw/main/AD%20Forest/AD-Scripts/CreateADPDC.zip'
       ConfigurationFunction: 'CreateADPDC.ps1\\CreateADPDC'
       Properties: {
-        domainFQDN: domainFQDN
+        domainFQDN: domainName
         adminCredential: {
           UserName: adminUsername
           Password: 'PrivateSettingsRef:adminPassword'
