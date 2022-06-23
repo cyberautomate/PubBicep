@@ -184,7 +184,7 @@ resource domainControllerConfiguration 'Microsoft.Compute/virtualMachines/extens
     typeHandlerVersion: '2.77'
     autoUpgradeMinorVersion: true
     settings: {
-      ModulesUrl: 'https://github.com/cyberautomate/PubBicep/blob/main/AD%20Forest/AD-Scripts/Deploy-DomainServices.zip'
+      ModulesUrl: 'https://github.com/cyberautomate/PubBicep/raw/main/AD%20Forest/AD-Scripts/Deploy-DomainServices.zip'
       ConfigurationFunction: 'Deploy-DomainServices.ps1\\Deploy-DomainServices'
       Properties: {
         domainFQDN: domainFQDN
