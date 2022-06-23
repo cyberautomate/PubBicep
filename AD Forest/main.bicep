@@ -184,8 +184,8 @@ resource domainControllerConfiguration 'Microsoft.Compute/virtualMachines/extens
     typeHandlerVersion: '2.77'
     autoUpgradeMinorVersion: true
     settings: {
-      ModulesUrl: 'https://github.com/cyberautomate/PubBicep/raw/main/AD%20Forest/AD-Scripts/Deploy-DomainServices.zip'
-      ConfigurationFunction: 'Deploy-DomainServices.ps1\\Deploy-DomainServices'
+      ModulesUrl: 'https://github.com/cyberautomate/PubBicep/raw/main/AD%20Forest/AD-Scripts/CreateADPDC.zip'
+      ConfigurationFunction: 'CreateADPDC.ps1\\CreateADPDC'
       Properties: {
         domainFQDN: domainFQDN
         adminCredential: {
