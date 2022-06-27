@@ -42,6 +42,9 @@ param sharedServicesSubscriptionId string = subscription().subscriptionId
 @description('The subscription ID for the On-Prem Network and resources. It defaults to the deployment subscription.')
 param onPremSubscriptionId string = subscription().subscriptionId
 
+@description('The subscription ID for the T3 Network and resources. It defaults to the deployment subscription.')
+param t3SubscriptionId string = subscription().subscriptionId
+
 @description('The region to deploy resources into. It defaults to the deployment location.')
 param location string = deployment().location
 
@@ -90,6 +93,13 @@ param onPremVirtualNetworkAddressPrefix string = '10.0.121.0/26'
 
 @description('The CIDR Subnet Address Prefix for the default On-Prem subnet. It must be in the On-Prem Virtual Network space.')
 param onPremSubnetAddressPrefix string = '10.0.121.0/27'
+
+@description('The CIDR Virtual Network Address Prefix for the T3 Virtual Network.')
+param t3VirtualNetworkAddressPrefix string = '10.0.122.0/26'
+
+@description('The CIDR Subnet Address Prefix for the default T3 subnet. It must be in the T3 Virtual Network space.')
+param t3SubnetAddressPrefix string = '10.0.122.0/27'
+
 
 // FIREWALL PARAMETERS
 
@@ -232,6 +242,7 @@ param identityNetworkSecurityGroupRules array = [
         operationsVirtualNetworkAddressPrefix
         sharedServicesVirtualNetworkAddressPrefix
         onPremVirtualNetworkAddressPrefix
+        t3VirtualNetworkAddressPrefix
       ]
       sourcePortRange: '*'
     }
@@ -347,6 +358,7 @@ param sharedServicesNetworkSecurityGroupRules array = [
       sourceAddressPrefixes: [
         operationsVirtualNetworkAddressPrefix
         identityVirtualNetworkAddressPrefix
+        t3VirtualNetworkAddressPrefix
       ]
       sourcePortRange: '*'
     }
@@ -429,6 +441,64 @@ param onPremNetworkSecurityGroupDiagnosticsMetrics array = []
 
 @description('An array of Service Endpoints to enable for the On-Prem subnet. See https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-service-endpoints-overview for valid settings.')
 param onPremSubnetServiceEndpoints array = [
+  {
+    service: 'Microsoft.Storage'
+  }
+]
+
+// Tier3 PARAMETERS
+
+@description('An array of Network Diagnostic Logs to enable for the T3 Virtual Network. See https://docs.microsoft.com/en-us/azure/azure-monitor/essentials/diagnostic-settings?tabs=CMD#logs for valid settings.')
+param t3VirtualNetworkDiagnosticsLogs array = []
+
+@description('An array of Network Diagnostic Metrics to enable for the T3 Virtual Network. See https://docs.microsoft.com/en-us/azure/azure-monitor/essentials/diagnostic-settings?tabs=CMD#metrics for valid settings.')
+param t3VirtualNetworkDiagnosticsMetrics array = []
+
+@description('An array of Network Security Group rules to apply to the T3 Virtual Network. See https://docs.microsoft.com/en-us/azure/templates/microsoft.network/networksecuritygroups/securityrules?tabs=bicep#securityrulepropertiesformat for valid settings.')
+param t3NetworkSecurityGroupRules array = [
+  {
+    name: 'Allow-Traffic-From-Spokes'
+    properties: {
+      access: 'Allow'
+      description: 'Allow traffic from spokes'
+      destinationAddressPrefix: t3VirtualNetworkAddressPrefix
+      destinationPortRanges: [
+        '22'
+        '80'
+        '443'
+        '3389'
+      ]
+      direction: 'Inbound'
+      priority: 200
+      protocol: '*'
+      sourceAddressPrefixes: [
+        operationsVirtualNetworkAddressPrefix
+        identityVirtualNetworkAddressPrefix
+        sharedServicesVirtualNetworkAddressPrefix
+      ]
+      sourcePortRange: '*'
+    }
+    type: 'string'
+  }
+]
+
+@description('An array of Network Security Group diagnostic logs to apply to the T3 Virtual Network. See https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-nsg-manage-log#log-categories for valid settings.')
+param t3NetworkSecurityGroupDiagnosticsLogs array = [
+  {
+    category: 'NetworkSecurityGroupEvent'
+    enabled: true
+  }
+  {
+    category: 'NetworkSecurityGroupRuleCounter'
+    enabled: true
+  }
+]
+
+@description('An array of Network Security Group Diagnostic Metrics to enable for the T3 Virtual Network. See https://docs.microsoft.com/en-us/azure/azure-monitor/essentials/diagnostic-settings?tabs=CMD#metrics for valid settings.')
+param t3NetworkSecurityGroupDiagnosticsMetrics array = []
+
+@description('An array of Service Endpoints to enable for the T3 subnet. See https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-service-endpoints-overview for valid settings.')
+param t3SubnetServiceEndpoints array = [
   {
     service: 'Microsoft.Storage'
   }
@@ -594,6 +664,19 @@ var onPremVirtualNetworkName = replace(virtualNetworkNamingConvention, nameToken
 var onPremNetworkSecurityGroupName = replace(networkSecurityGroupNamingConvention, nameToken, onPremName)
 var onPremSubnetName = replace(subnetNamingConvention, nameToken, onPremName)
 
+// T3 NAMES
+
+var t3Name = 'tier3'
+var t3ShortName = 't3'
+var t3ResourceGroupName = replace(resourceGroupNamingConvention, nameToken, t3Name)
+var t3LogStorageAccountShortName = replace(storageAccountNamingConvention, nameToken, t3ShortName)
+var t3LogStorageAccountUniqueName = replace(t3LogStorageAccountShortName, 'unique_storage_token', uniqueString(resourcePrefix, resourceSuffix, t3SubscriptionId))
+var t3LogStorageAccountName = take(t3LogStorageAccountUniqueName, 23)
+var t3VirtualNetworkName = replace(virtualNetworkNamingConvention, nameToken, t3Name)
+var t3NetworkSecurityGroupName = replace(networkSecurityGroupNamingConvention, nameToken, t3Name)
+var t3SubnetName = replace(subnetNamingConvention, nameToken, t3Name)
+
+
 // LOG ANALYTICS NAMES
 
 var logAnalyticsWorkspaceName = replace(logAnalyticsWorkspaceNamingConvention, nameToken, operationsName)
@@ -693,6 +776,23 @@ var spokes = [
     subnetName: onPremSubnetName
     subnetAddressPrefix: onPremSubnetAddressPrefix
     subnetServiceEndpoints: onPremSubnetServiceEndpoints
+  }
+  {
+    name: t3Name
+    subscriptionId: t3SubscriptionId
+    resourceGroupName: t3ResourceGroupName
+    logStorageAccountName: t3LogStorageAccountName
+    virtualNetworkName: t3VirtualNetworkName
+    virtualNetworkAddressPrefix: t3VirtualNetworkAddressPrefix
+    virtualNetworkDiagnosticsLogs: t3VirtualNetworkDiagnosticsLogs
+    virtualNetworkDiagnosticsMetrics: t3VirtualNetworkDiagnosticsMetrics
+    networkSecurityGroupName: t3NetworkSecurityGroupName
+    networkSecurityGroupRules: t3NetworkSecurityGroupRules
+    networkSecurityGroupDiagnosticsLogs: t3NetworkSecurityGroupDiagnosticsLogs
+    networkSecurityGroupDiagnosticsMetrics: t3NetworkSecurityGroupDiagnosticsMetrics
+    subnetName: t3SubnetName
+    subnetAddressPrefix: t3SubnetAddressPrefix
+    subnetServiceEndpoints: t3SubnetServiceEndpoints
   }
 ]
 

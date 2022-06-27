@@ -6,12 +6,6 @@ param adminUsername string = 'chief'
 @secure()
 param adminPassword string
 
-@description('The Windows version for the VM. This will pick a fully patched Gen2 image of this given Windows version.')
-@allowed([
-  '2022-datacenter-smalldisk-g2'
-])
-param OSVersion string = '2022-datacenter-smalldisk-g2'
-
 @description('Size of the virtual machine.')
 param vmSize string = 'Standard_B2s'
 
@@ -19,7 +13,7 @@ param vmSize string = 'Standard_B2s'
 param location string = resourceGroup().location
 
 @description('Name of the virtual machine.')
-param vmName string = 'onPremDC'
+param vmName string = 't3CL2'
 
 //@description('FQDN of domain being built inside the DC VM')
 //param domainFQDN string = 'chiefslab.local'
@@ -32,10 +26,10 @@ param vmName string = 'onPremDC'
 
 var logAnalyticsRG = 'mymlz-rg-operations-mlz'
 var logAnalyticsWorkspaceName = 'mymlz-log-operations-mlz'
-var storageAccountName = 'mymlzstonpremebxxtcvdy6'
-var subnetName = 'mymlz-snet-onPrem-mlz'
-var virtualNetworkName = 'mymlz-vnet-onPrem-mlz'
-var networkSecurityGroupName = 'mymlz-nsg-onPrem-mlz'
+var storageAccountName = 'mymlzstt3ebxxtcvdy6vcu'
+var subnetName = 'mymlz-snet-tier3-mlz'
+var virtualNetworkName = 'mymlz-vnet-tier3-mlz'
+var networkSecurityGroupName = 'mymlz-nsg-tier3-mlz'
 //var url = 'https://github.com/joshua-a-lucas/BlueTeamLab/raw/main/scripts/Deploy-DomainServices.zip'
 
 resource stg 'Microsoft.Storage/storageAccounts@2021-09-01' existing = {
@@ -87,9 +81,9 @@ resource svrVM 'Microsoft.Compute/virtualMachines@2021-03-01' = {
     }
     storageProfile: {
       imageReference: {
-        publisher: 'MicrosoftWindowsServer'
-        offer: 'WindowsServer'
-        sku: OSVersion
+        publisher: 'microsoftwindowsdesktop'
+        offer: 'windows-11'
+        sku: 'win11-21h2-ent'
         version: 'latest'
       }
       osDisk: {
@@ -99,14 +93,6 @@ resource svrVM 'Microsoft.Compute/virtualMachines@2021-03-01' = {
         }
         deleteOption:'Delete'
       }
-      dataDisks: [
-        {
-          diskSizeGB: 1023
-          lun: 0
-          createOption: 'Empty'
-          deleteOption:'Delete'
-        }
-      ]
     }
     networkProfile: {
       networkInterfaces: [
@@ -180,47 +166,3 @@ resource networkWatcher 'Microsoft.Compute/virtualMachines/extensions@2020-06-01
     typeHandlerVersion: '1.4'
   }
 }
-
-// Use PowerShell DSC to deploy Active Directory Domain Services on the domain controller
-/*
-resource domainControllerConfiguration 'Microsoft.Compute/virtualMachines/extensions@2021-11-01' = {
-  name: '${svrVM.name}/Microsoft.Powershell.DSC'
-  location: location
-  properties: {
-    publisher: 'Microsoft.Powershell'
-    type: 'DSC'
-    typeHandlerVersion: '2.77'
-    autoUpgradeMinorVersion: true
-    settings: {
-      ModulesUrl: url
-      ConfigurationFunction: 'Deploy-DomainServices.ps1\\Deploy-DomainServices'
-      Properties: {
-        domainFQDN: domainFQDN
-        adminCredential: {
-          UserName: adminUsername
-          Password: 'PrivateSettingsRef:adminPassword'
-        }
-      }
-    }
-    protectedSettings: {
-      Items: {
-          adminPassword: adminPassword
-      }
-    }
-  }
-}
-
-// Update the virtual network with the domain controller as the primary DNS server
-module virtualNetworkDNS 'modules/updateVNET.bicep' = {
-  name: '${svrVM}.virtualNetworkDNS'
-  params: {
-    location: location
-    virtualNetworkName: virtualNetworkName
-    virtualNetworkAddressSpace: virtualNetworkAddressSpace
-    subnetName: subnetName
-    subnetAddressRange: subnetAddressRange
-    dnsServerIPAddress: nic.properties.ipConfigurations[0].properties.privateIPAddress
-    nsg: nsg.id
-  }
-}
-*/
