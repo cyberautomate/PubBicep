@@ -44,8 +44,8 @@ Get-AzResourceGroup | Select-Object -Property ResourceGroupName
 
 # Deploy VM to MLZ
 $vmTemplateFile = 'main.bicep'
-$adDeploymentName = 'Deploy-Domain-Controller'
-$resourceGroupName = 'mymlz-rg-onPrem-mlz'
+$adDeploymentName = 'Deploy-T3-Client'
+$resourceGroupName = 'mymlz-rg-tier3-mlz'
 
 New-AzResourceGroupDeployment -TemplateFile $vmTemplateFile -Name $adDeploymentName -ResourceGroupName $resourceGroupName -Verbose
 

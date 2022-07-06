@@ -13,7 +13,7 @@ param vmSize string = 'Standard_B2s'
 param location string = resourceGroup().location
 
 @description('Name of the virtual machine.')
-param vmName string = 't3CL2'
+param vmName string = 't3CL7'
 
 //@description('FQDN of domain being built inside the DC VM')
 //param domainFQDN string = 'chiefslab.local'
