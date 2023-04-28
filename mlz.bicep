@@ -46,7 +46,7 @@ param onPremSubscriptionId string = subscription().subscriptionId
 param t3SubscriptionId string = subscription().subscriptionId
 
 @description('The region to deploy resources into. It defaults to the deployment location.')
-param location string = deployment().location
+param location string = 'mlz'
 
 // RESOURCE NAMING PARAMETERS
 
